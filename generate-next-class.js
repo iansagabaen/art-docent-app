@@ -44,7 +44,7 @@ function formatShortDate(dateStr) {
 
 async function generateNextClassJson() {
   try {
-    console.log('📋 Generating next-class.json from Google Sheets...')
+    console.error('📋 Generating next-class.json from Google Sheets...')
 
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
 
