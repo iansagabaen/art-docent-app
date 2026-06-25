@@ -1,5 +1,33 @@
 import React, { useState, useEffect } from 'react'
 
+// Parse CSV line handling quoted fields with commas
+function parseCSVLine(line) {
+  const result = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    const nextChar = line[i + 1]
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  result.push(current.trim())
+  return result
+}
+
 export default function App() {
   const [upcomingClasses, setUpcomingClasses] = useState([])
   const [qualifiedLessons, setQualifiedLessons] = useState([])
@@ -15,21 +43,21 @@ export default function App() {
 
   const fetchAndProcessData = async () => {
     try {
-      // Fetch CSV from Google Sheets
-      const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
-      const response = await fetch(csvUrl)
+      // Fetch CSV from backend proxy endpoint
+      const response = await fetch('/api/sheets-csv')
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const csvText = await response.text()
 
-      // Parse CSV (tab-separated)
+      // Parse CSV (comma-separated, handling quoted fields)
       const lines = csvText.split('\n').filter(line => line.trim())
-      const headers = lines[0].split('\t')
+      const headers = parseCSVLine(lines[0])
       
       // Create array of objects from CSV
       const rows = lines.slice(1).map(line => {
-        const values = line.split('\t')
+        const values = parseCSVLine(line)
         const obj = {}
         headers.forEach((header, index) => {
-          obj[header.trim()] = values[index]?.trim() || ''
+          obj[header] = values[index] || ''
         })
         return obj
       })
