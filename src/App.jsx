@@ -257,9 +257,6 @@ export default function App() {
 
       {/* Upcoming Classes */}
       <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: '600' }}>
-          📅 Upcoming Classes
-        </h2>
         {upcomingClasses.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {upcomingClasses.map((cls, idx) => {
@@ -277,11 +274,6 @@ export default function App() {
                     boxShadow: isNext ? '0 4px 12px rgba(217, 70, 166, 0.3)' : 'none',
                   }}
                 >
-                  {isNext && (
-                    <div style={{ fontSize: '0.75rem', fontWeight: '600', marginBottom: '0.5rem', color: '#fda4af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      🎯 Next Class
-                    </div>
-                  )}
                   <div style={{ fontSize: '0.875rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.25rem' }}>
                     {formatDateNoLeadingZero(cls['Date'])} • {cls['Time']}
                   </div>
@@ -327,11 +319,11 @@ export default function App() {
                       const ianIsLead = lead.includes('Ian')
                       const hasLead = lead.length > 0
 
-                      // Build comma-separated list
+                      // Build list of people with their highlighting
                       const people = []
-                      if (lead) people.push(lead)
-                      if (assist1) people.push(assist1)
-                      if (assist2) people.push(assist2)
+                      if (lead) people.push({ name: lead, isIan: lead.includes('Ian') })
+                      if (assist1) people.push({ name: assist1, isIan: assist1.includes('Ian') })
+                      if (assist2) people.push({ name: assist2, isIan: assist2.includes('Ian') })
 
                       return (
                         <div>
@@ -341,11 +333,18 @@ export default function App() {
                             </div>
                           )}
                           {people.length > 0 && (
-                            <div style={{
-                              color: ianIsLead ? (isNext ? '#fda4af' : '#86efac') : '#d1d5db',
-                              fontWeight: ianIsLead ? '600' : 'normal'
-                            }}>
-                              {people.join(', ')}
+                            <div>
+                              {people.map((person, idx) => (
+                                <span key={idx}>
+                                  <span style={{
+                                    color: person.isIan && ianIsLead ? (isNext ? '#fda4af' : '#86efac') : '#d1d5db',
+                                    fontWeight: person.isIan && ianIsLead ? '600' : 'normal'
+                                  }}>
+                                    {person.name}
+                                  </span>
+                                  {idx < people.length - 1 && <span style={{ color: '#d1d5db' }}>, </span>}
+                                </span>
+                              ))}
                             </div>
                           )}
                         </div>
