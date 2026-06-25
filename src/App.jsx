@@ -8,28 +8,28 @@ const CURRICULUM_LINKS = {
   'Cityscape: A Lesson in Architecture': 'https://docs.google.com/document/d/1n33yu75263k9_NQcGCeutMddw8N60gbyPJcmPx4DMI4/edit?tab=t.0#heading=h.t4jioe7i6ng',
   'Photography': 'https://docs.google.com/document/d/1Xx6sdYhi3drzeERLK22ieKCOzbfa6hYw6mCJItCXctg/edit?tab=t.0#heading=h.t4jioe7i6ng',
   'Art That Speaks': null, // TODO: Add URL
-  'Tidal Zone Prints': null, // TODO: Add URL
+  'Tidal Zone Prints': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit', // TODO: Add URL
 
-  // Potentially qualified/Single - PDFs or other URLs
-  'Clay Wickiups': '/pdfs/clay-wickiups.pdf',
-  'Mixed Moods': '/pdfs/mixed-moods.pdf',
-  'Positively Negative': '/pdfs/positively-negative.pdf',
-  'Reflections on Buildings': '/pdfs/reflections-on-buildings.pdf',
-  'Pigment of Imagination': '/pdfs/pigment-of-imagination.pdf',
-  'Clay Bears & Quail': '/pdfs/clay-bears-and-quail.pdf',
-  'Drawing Still Life': '/pdfs/drawing-still-life.pdf',
-  'Egyptian Bird Masks': '/pdfs/egyptian-bird-masks.pdf',
-  'Fauve Landscape': '/pdfs/fauve-landscape.pdf',
-  'Finding Balance': '/pdfs/finding-balance.pdf',
-  'Heads & Faces': '/pdfs/heads-and-faces.pdf',
-  'Human Form': '/pdfs/human-form.pdf',
-  'Lights, Color, Collage': '/pdfs/lights-color-collage.pdf',
-  'Pleasing Pastels': '/pdfs/pleasing-pastels.pdf',
-  'Printmaking': '/pdfs/printmaking.pdf',
-  'See Shells': '/pdfs/see-shells.pdf',
-  'Watercolor Ecospheres': '/pdfs/watercolor-ecospheres.pdf',
-  'Watercolor Seascapes': '/pdfs/watercolor-seascapes.pdf',
-  'Watercolor Still Life': '/pdfs/watercolor-still-life.pdf',
+  // Potentially qualified/Single - PDFs (using school district filenames)
+  'Clay Wickiups': null, // TODO: Add when available
+  'Mixed Moods': '/pdfs/Mixed Moods_5.pdf',
+  'Positively Negative': '/pdfs/PositivelyNegative_5.pdf',
+  'Reflections on Buildings': '/pdfs/Reflections on Buildings_2.pdf',
+  'Pigment of Imagination': null, // TODO: Add when available
+  'Clay Bears & Quail': '/pdfs/Clay Bears & Quail_3.pdf',
+  'Drawing Still Life': '/pdfs/Drawing Still Life.pdf',
+  'Egyptian Bird Masks': '/pdfs/EgyptianBirdMasks_6.pdf',
+  'Fauve Landscape': '/pdfs/Fauve_2 (1).pdf',
+  'Finding Balance': null, // TODO: Add when available
+  'Heads & Faces': '/pdfs/Heads & Faces_2.pdf',
+  'Human Form': null, // TODO: Add when available
+  'Lights, Color, Collage': null, // TODO: Add when available
+  'Pleasing Pastels': null, // TODO: Add when available
+  'Printmaking': null, // TODO: Add when available
+  'See Shells': null, // TODO: Add when available
+  'Watercolor Ecospheres': null, // TODO: Add when available
+  'Watercolor Seascapes': '/pdfs/Watercolor Seascapes_5.pdf',
+  'Watercolor Still Life': '/pdfs/WatercolorStillLife_5.pdf',
 }
 
 // Helper: Get today's date, or use TEST_DATE if set
