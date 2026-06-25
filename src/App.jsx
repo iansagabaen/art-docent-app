@@ -1,5 +1,34 @@
 import React, { useState, useEffect } from 'react'
 
+// Curriculum links - add your Google Docs and PDF URLs here
+// Qualified lessons (3+): add Google Doc URLs
+// Potentially qualified/Single (1-2): add PDF URLs
+const CURRICULUM_LINKS = {
+  // Qualified lessons - Google Docs
+  'Cityscape: A Lesson in Architecture': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
+  'Photography': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
+  'Art That Speaks': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
+  'Tidal Zone Prints': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
+
+  // Potentially qualified/Single - PDFs or other URLs
+  'Clay Wickiups': null, // TODO: Add PDF URL
+  'Mixed Moods': null,
+  'Positively Negative': null,
+  'Reflections on Buildings': null,
+  'Pigment of Imagination': null,
+  // Add more as needed
+}
+
+// Helper: Get today's date, or use TEST_DATE if set
+function getTodayDate() {
+  const testDate = new URLSearchParams(window.location.search).get('testDate')
+  if (testDate) {
+    const d = new Date(testDate)
+    if (!isNaN(d)) return d
+  }
+  return new Date()
+}
+
 // Parse CSV line handling quoted fields with commas
 function parseCSVLine(line) {
   const result = []
@@ -99,14 +128,14 @@ export default function App() {
       setPotentiallyQualifiedLessons(potentially.sort((a, b) => b.count - a.count))
       setSingleExperienceLessons(single.sort((a, b) => a.lesson.localeCompare(b.lesson)))
 
-      // Calculate years as docent
+      // Calculate years as docent (using test date if provided)
       const firstDate = new Date('2024-10-22')
-      const today = new Date()
+      const today = getTodayDate()
       const yearsElapsed = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24 * 365.25))
       setYearsAsDocent(yearsElapsed >= 2 ? yearsElapsed : 2)
 
-      // Filter upcoming classes (future dates)
-      const today2 = new Date()
+      // Filter upcoming classes (future dates, using test date if provided)
+      const today2 = new Date(getTodayDate())
       today2.setHours(0, 0, 0, 0)
       const upcoming = ianRows.filter(row => {
         const dateStr = row['Date']
@@ -144,8 +173,24 @@ export default function App() {
     )
   }
 
+  const testDate = new URLSearchParams(window.location.search).get('testDate')
+
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+      {testDate && (
+        <div style={{
+          background: '#7c2d12',
+          border: '1px solid #ea580c',
+          borderRadius: '0.5rem',
+          padding: '0.75rem',
+          marginBottom: '1.5rem',
+          fontSize: '0.875rem',
+          color: '#fed7aa',
+        }}>
+          ⏰ Testing with date: {new Date(testDate).toDateString()}
+        </div>
+      )}
+
       {/* Header */}
       <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: '600' }}>
         Art Docent Schedule
@@ -221,12 +266,24 @@ export default function App() {
             🏆 Qualified to Lead (3+ times)
           </h3>
           {qualifiedLessons.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {qualifiedLessons.map((item, idx) => (
-                <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
-                  {item.lesson} <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {qualifiedLessons.map((item, idx) => {
+                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                return (
+                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                      <span>{item.lesson}</span>
+                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
+                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                        <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
+                          style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline' }}>
+                          📖 Curriculum
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>None yet</div>
@@ -236,15 +293,27 @@ export default function App() {
         {/* Potentially Qualified */}
         <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '0.5px solid #374151' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '0.75rem', color: '#fbbf24' }}>
-            ⭐ Potentially Qualified (1-2 times)
+            ⭐ Potentially Qualified (2 times)
           </h3>
           {potentiallyQualifiedLessons.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {potentiallyQualifiedLessons.map((item, idx) => (
-                <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
-                  {item.lesson} <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {potentiallyQualifiedLessons.map((item, idx) => {
+                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                return (
+                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                      <span>{item.lesson}</span>
+                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
+                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                        <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
+                          style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline' }}>
+                          📄 PDF
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>None yet</div>
@@ -255,18 +324,29 @@ export default function App() {
         {singleExperienceLessons.length > 0 && (
           <div>
             <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '0.75rem', color: '#60a5fa' }}>
-              ✨ Single Experience
+              ✨ Single Experience (1 time)
             </h3>
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
               fontSize: '0.875rem',
               color: '#9ca3af',
             }}>
-              {singleExperienceLessons.map((item, idx) => (
-                <div key={idx}>{item.lesson}</div>
-              ))}
+              {singleExperienceLessons.map((item, idx) => {
+                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                return (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span>{item.lesson}</span>
+                    {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                      <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline', marginLeft: 'auto' }}>
+                        📄 PDF
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
