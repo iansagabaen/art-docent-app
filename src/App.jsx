@@ -275,32 +275,77 @@ export default function App() {
                   <div style={{ fontSize: '0.875rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.25rem' }}>
                     {cls['Date']} • {cls['Time']}
                   </div>
-                  <div style={{ fontSize: isNext ? '1.125rem' : '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                    {cls['Lesson']}
-                  </div>
-                  <div style={{ fontSize: '0.9rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.5rem' }}>
-                    {cls['Teacher']} @ {cls['School']}
-                    {cls['Grade'] && ` (Grade ${cls['Grade']})`}
-                  </div>
-                  {getPdfUrlForLesson(cls['Lesson']) && (
+                  {getPdfUrlForLesson(cls['Lesson']) ? (
                     <a
                       href={getPdfUrlForLesson(cls['Lesson'])}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        display: 'inline-block',
-                        fontSize: '0.8rem',
-                        padding: '0.35rem 0.6rem',
-                        background: isNext ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
-                        borderRadius: '0.25rem',
+                        fontSize: isNext ? '1.125rem' : '1rem',
+                        fontWeight: '600',
+                        marginBottom: '0.25rem',
+                        display: 'block',
                         textDecoration: 'none',
-                        color: isNext ? '#fda4af' : '#93c5fd',
-                        border: isNext ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        opacity: 0.9,
+                        transition: 'opacity 0.2s'
                       }}
+                      onMouseEnter={(e) => e.target.style.opacity = '0.7'}
+                      onMouseLeave={(e) => e.target.style.opacity = '0.9'}
                     >
-                      {cls['Lesson'].includes('Cityscape') || cls['Lesson'].includes('Photography') || cls['Lesson'].includes('Art That Speaks') || cls['Lesson'].includes('Tidal Zone') ? '📖 Curriculum' : '📄 PDF'}
+                      {cls['Lesson']}
                     </a>
+                  ) : (
+                    <div style={{ fontSize: isNext ? '1.125rem' : '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                      {cls['Lesson']}
+                    </div>
                   )}
+
+                  <div style={{ fontSize: '0.9rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.5rem' }}>
+                    {cls['Teacher']} @ {cls['School']}
+                    {cls['Grade'] && ` (Grade ${cls['Grade']})`}
+                  </div>
+
+                  {/* Leads and Assists */}
+                  <div style={{ fontSize: '0.85rem', opacity: isNext ? 0.85 : 0.65, marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                    {(() => {
+                      const lead = cls['Lead']?.trim() || ''
+                      const assist1 = cls['Assist']?.trim() || ''
+                      const assist2 = cls['Assist 2']?.trim() || ''
+
+                      const ianIsLead = lead.includes('Ian')
+                      const hasLead = lead.length > 0
+
+                      return (
+                        <div>
+                          {!hasLead && (
+                            <div style={{ color: '#fca5a5', fontSize: '0.8rem', marginBottom: '0.3rem' }}>
+                              ⚠️ No lead assigned
+                            </div>
+                          )}
+                          {lead && (
+                            <div style={{
+                              color: ianIsLead ? (isNext ? '#fda4af' : '#86efac') : '#e5e7eb',
+                              fontWeight: ianIsLead ? '600' : 'normal'
+                            }}>
+                              {lead}
+                            </div>
+                          )}
+                          {assist1 && (
+                            <div style={{ color: '#d1d5db', fontSize: '0.85rem' }}>
+                              {assist1}
+                            </div>
+                          )}
+                          {assist2 && (
+                            <div style={{ color: '#d1d5db', fontSize: '0.85rem' }}>
+                              {assist2}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </div>
                 </div>
               )
             })}
