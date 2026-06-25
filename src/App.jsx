@@ -42,6 +42,16 @@ function getTodayDate() {
   return new Date()
 }
 
+// Format date without leading zeros (e.g., "March 4, 2026" not "March 04, 2026")
+function formatDateNoLeadingZero(dateStr) {
+  if (!dateStr) return dateStr
+  const date = new Date(dateStr)
+  const month = date.toLocaleDateString('en-US', { month: 'long' })
+  const day = date.getDate() // No leading zero
+  const year = date.getFullYear()
+  return `${month} ${day}, ${year}`
+}
+
 // Parse CSV line handling quoted fields with commas
 function parseCSVLine(line) {
   const result = []
@@ -273,7 +283,7 @@ export default function App() {
                     </div>
                   )}
                   <div style={{ fontSize: '0.875rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.25rem' }}>
-                    {cls['Date']} • {cls['Time']}
+                    {formatDateNoLeadingZero(cls['Date'])} • {cls['Time']}
                   </div>
                   {getPdfUrlForLesson(cls['Lesson']) ? (
                     <a
@@ -308,7 +318,7 @@ export default function App() {
                   </div>
 
                   {/* Leads and Assists */}
-                  <div style={{ fontSize: '0.85rem', opacity: isNext ? 0.85 : 0.65, marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: '0.85rem', opacity: isNext ? 0.85 : 0.65, marginBottom: '0.5rem' }}>
                     {(() => {
                       const lead = cls['Lead']?.trim() || ''
                       const assist1 = cls['Assist']?.trim() || ''
@@ -317,6 +327,12 @@ export default function App() {
                       const ianIsLead = lead.includes('Ian')
                       const hasLead = lead.length > 0
 
+                      // Build comma-separated list
+                      const people = []
+                      if (lead) people.push(lead)
+                      if (assist1) people.push(assist1)
+                      if (assist2) people.push(assist2)
+
                       return (
                         <div>
                           {!hasLead && (
@@ -324,22 +340,12 @@ export default function App() {
                               ⚠️ No lead assigned
                             </div>
                           )}
-                          {lead && (
+                          {people.length > 0 && (
                             <div style={{
-                              color: ianIsLead ? (isNext ? '#fda4af' : '#86efac') : '#e5e7eb',
+                              color: ianIsLead ? (isNext ? '#fda4af' : '#86efac') : '#d1d5db',
                               fontWeight: ianIsLead ? '600' : 'normal'
                             }}>
-                              {lead}
-                            </div>
-                          )}
-                          {assist1 && (
-                            <div style={{ color: '#d1d5db', fontSize: '0.85rem' }}>
-                              {assist1}
-                            </div>
-                          )}
-                          {assist2 && (
-                            <div style={{ color: '#d1d5db', fontSize: '0.85rem' }}>
-                              {assist2}
+                              {people.join(', ')}
                             </div>
                           )}
                         </div>
@@ -377,12 +383,9 @@ export default function App() {
         </h2>
 
         <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '0.875rem', color: '#9ca3af', marginBottom: '0.5rem' }}>
-            Started: <span style={{ fontWeight: '600', color: '#f3f4f6' }}>October 2024</span>
-          </div>
           <div style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
-            Years as docent: <span style={{ fontWeight: '600', color: '#f3f4f6', fontSize: '1rem' }}>
-              {yearsAsDocent} {yearsAsDocent === 1 ? 'year' : 'years'}
+            <span style={{ fontWeight: '600', color: '#f3f4f6' }}>
+              {yearsAsDocent} {yearsAsDocent === 1 ? 'year' : 'years'}, since 2024
             </span>
           </div>
         </div>
@@ -397,16 +400,17 @@ export default function App() {
               {qualifiedLessons.map((item, idx) => {
                 const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
-                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
+                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb', marginBottom: '0.35rem' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                      <span>{item.lesson}</span>
-                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
-                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' ? (
                         <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
-                          style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline' }}>
-                          📖 Curriculum
+                          style={{ color: '#e5e7eb', textDecoration: 'dotted underline', cursor: 'pointer' }}>
+                          {item.lesson}
                         </a>
+                      ) : (
+                        <span>{item.lesson}</span>
                       )}
+                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
                     </div>
                   </div>
                 )
@@ -427,16 +431,17 @@ export default function App() {
               {potentiallyQualifiedLessons.map((item, idx) => {
                 const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
-                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
+                  <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb', marginBottom: '0.35rem' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                      <span>{item.lesson}</span>
-                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
-                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                      {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' ? (
                         <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
-                          style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline' }}>
-                          📄 PDF
+                          style={{ color: '#e5e7eb', textDecoration: 'dotted underline', cursor: 'pointer' }}>
+                          {item.lesson}
                         </a>
+                      ) : (
+                        <span>{item.lesson}</span>
                       )}
+                      <span style={{ color: '#9ca3af', fontSize: '0.875rem' }}>({item.count}x)</span>
                     </div>
                   </div>
                 )
@@ -463,13 +468,14 @@ export default function App() {
               {singleExperienceLessons.map((item, idx) => {
                 const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                    <span>{item.lesson}</span>
-                    {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' && (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    {curriculumUrl && curriculumUrl !== 'https://docs.google.com/document/d/YOUR-DOC-ID/edit' ? (
                       <a href={curriculumUrl} target="_blank" rel="noopener noreferrer"
-                        style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'underline', marginLeft: 'auto' }}>
-                        📄 PDF
+                        style={{ color: '#e5e7eb', textDecoration: 'dotted underline', cursor: 'pointer', flex: 1 }}>
+                        {item.lesson}
                       </a>
+                    ) : (
+                      <span style={{ flex: 1 }}>{item.lesson}</span>
                     )}
                   </div>
                 )
