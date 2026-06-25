@@ -1,0 +1,8 @@
+# Ensure static JSON files are served with correct headers
+/next-class.json  /next-class.json  200
+
+# PDF files should be served as-is
+/pdfs/*  /pdfs/:splat  200
+
+# Everything else - SPA routing
+/*  /index.html  200
