@@ -1,6 +1,6 @@
-import fetch from 'node-fetch'
+const fetch = require('node-fetch')
 
-export default async (req, context) => {
+exports.handler = async (event, context) => {
   try {
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
 
@@ -85,17 +85,18 @@ export default async (req, context) => {
     })
 
     if (!nextClass) {
-      return new Response(JSON.stringify({
-        nextClass: null,
-        message: 'No upcoming classes'
-      }), {
-        status: 200,
+      return {
+        statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'max-age=3600'
-        }
-      })
+        },
+        body: JSON.stringify({
+          nextClass: null,
+          message: 'No upcoming classes'
+        })
+      }
     }
 
     // Format date without leading zeros
@@ -104,34 +105,36 @@ export default async (req, context) => {
     const day = dateObj.getDate()
     const formattedDate = `${month} ${day}`
 
-    return new Response(JSON.stringify({
-      nextClass: {
-        date: formattedDate,
-        time: nextClass['Time'],
-        lesson: nextClass['Lesson'],
-        teacher: nextClass['Teacher'],
-        school: nextClass['School'],
-        grade: nextClass['Grade'],
-        lead: nextClass['Lead'],
-        assist: nextClass['Assist'],
-        assist2: nextClass['Assist 2']
-      }
-    }), {
-      status: 200,
+    return {
+      statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'max-age=3600'
-      }
-    })
+      },
+      body: JSON.stringify({
+        nextClass: {
+          date: formattedDate,
+          time: nextClass['Time'],
+          lesson: nextClass['Lesson'],
+          teacher: nextClass['Teacher'],
+          school: nextClass['School'],
+          grade: nextClass['Grade'],
+          lead: nextClass['Lead'],
+          assist: nextClass['Assist'],
+          assist2: nextClass['Assist 2']
+        }
+      })
+    }
   } catch (err) {
     console.error('Error:', err)
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
+    return {
+      statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
-      }
-    })
+      },
+      body: JSON.stringify({ error: err.message })
+    }
   }
 }
