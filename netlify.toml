@@ -12,3 +12,8 @@
   from = "/api/sheets-csv"
   to = "/.netlify/functions/get-csv"
   status = 200
+
+[[redirects]]
+  from = "/api/next-class"
+  to = "/.netlify/functions/next-class"
+  status = 200
