@@ -32,6 +32,12 @@ self.addEventListener('fetch', event => {
     return
   }
 
+  // Don't cache-then-fallback for API/data requests (JSON, etc.)
+  if (event.request.url.includes('.json')) {
+    event.respondWith(fetch(event.request))
+    return
+  }
+
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) {
