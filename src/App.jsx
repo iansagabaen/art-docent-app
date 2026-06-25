@@ -76,12 +76,48 @@ export default function App() {
   const [potentiallyQualifiedLessons, setPotentiallyQualifiedLessons] = useState([])
   const [singleExperienceLessons, setSingleExperienceLessons] = useState([])
   const [yearsAsDocent, setYearsAsDocent] = useState(0)
+  const [availablePdfs, setAvailablePdfs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchAndProcessData()
+    fetchAvailablePdfs()
   }, [])
+
+  // Auto-discover PDFs in the public/pdfs folder
+  const fetchAvailablePdfs = async () => {
+    try {
+      const response = await fetch('/api/list-pdfs')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailablePdfs(data.pdfs || [])
+      }
+    } catch (err) {
+      console.log('PDF listing not available (expected in dev mode)')
+    }
+  }
+
+  // Helper to find PDF for a lesson by filename matching
+  const getPdfUrlForLesson = (lessonName) => {
+    if (!availablePdfs.length) {
+      return CURRICULUM_LINKS[lessonName] // Fallback to manual links
+    }
+
+    // Try to find a matching PDF in the available files
+    const matchedPdf = availablePdfs.find(pdf => {
+      // Normalize names for matching (remove punctuation, make lowercase)
+      const pdfNorm = pdf.toLowerCase().replace(/[_\s\.]/g, '')
+      const lessonNorm = lessonName.toLowerCase().replace(/[_\s\.]/g, '')
+      return pdfNorm.includes(lessonNorm) || lessonNorm.includes(pdfNorm.replace('.pdf', ''))
+    })
+
+    if (matchedPdf) {
+      return `/pdfs/${matchedPdf}`
+    }
+
+    return CURRICULUM_LINKS[lessonName] // Fallback to manual links
+  }
 
   const fetchAndProcessData = async () => {
     try {
@@ -246,9 +282,9 @@ export default function App() {
                     {cls['Teacher']} @ {cls['School']}
                     {cls['Grade'] && ` (Grade ${cls['Grade']})`}
                   </div>
-                  {CURRICULUM_LINKS[cls['Lesson']] && (
+                  {getPdfUrlForLesson(cls['Lesson']) && (
                     <a
-                      href={CURRICULUM_LINKS[cls['Lesson']]}
+                      href={getPdfUrlForLesson(cls['Lesson'])}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -314,7 +350,7 @@ export default function App() {
           {qualifiedLessons.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {qualifiedLessons.map((item, idx) => {
-                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
                   <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
@@ -344,7 +380,7 @@ export default function App() {
           {potentiallyQualifiedLessons.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {potentiallyQualifiedLessons.map((item, idx) => {
-                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
                   <div key={idx} style={{ fontSize: '0.95rem', color: '#e5e7eb' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
@@ -380,7 +416,7 @@ export default function App() {
               color: '#9ca3af',
             }}>
               {singleExperienceLessons.map((item, idx) => {
-                const curriculumUrl = CURRICULUM_LINKS[item.lesson]
+                const curriculumUrl = getPdfUrlForLesson(item.lesson)
                 return (
                   <div key={idx} style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                     <span>{item.lesson}</span>
