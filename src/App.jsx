@@ -5,18 +5,31 @@ import React, { useState, useEffect } from 'react'
 // Potentially qualified/Single (1-2): add PDF URLs
 const CURRICULUM_LINKS = {
   // Qualified lessons - Google Docs
-  'Cityscape: A Lesson in Architecture': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
-  'Photography': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
-  'Art That Speaks': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
-  'Tidal Zone Prints': 'https://docs.google.com/document/d/YOUR-DOC-ID/edit',
+  'Cityscape: A Lesson in Architecture': 'https://docs.google.com/document/d/1n33yu75263k9_NQcGCeutMddw8N60gbyPJcmPx4DMI4/edit?tab=t.0#heading=h.t4jioe7i6ng',
+  'Photography': 'https://docs.google.com/document/d/1Xx6sdYhi3drzeERLK22ieKCOzbfa6hYw6mCJItCXctg/edit?tab=t.0#heading=h.t4jioe7i6ng',
+  'Art That Speaks': null, // TODO: Add URL
+  'Tidal Zone Prints': null, // TODO: Add URL
 
   // Potentially qualified/Single - PDFs or other URLs
-  'Clay Wickiups': null, // TODO: Add PDF URL
-  'Mixed Moods': null,
-  'Positively Negative': null,
-  'Reflections on Buildings': null,
-  'Pigment of Imagination': null,
-  // Add more as needed
+  'Clay Wickiups': '/pdfs/clay-wickiups.pdf',
+  'Mixed Moods': '/pdfs/mixed-moods.pdf',
+  'Positively Negative': '/pdfs/positively-negative.pdf',
+  'Reflections on Buildings': '/pdfs/reflections-on-buildings.pdf',
+  'Pigment of Imagination': '/pdfs/pigment-of-imagination.pdf',
+  'Clay Bears & Quail': '/pdfs/clay-bears-and-quail.pdf',
+  'Drawing Still Life': '/pdfs/drawing-still-life.pdf',
+  'Egyptian Bird Masks': '/pdfs/egyptian-bird-masks.pdf',
+  'Fauve Landscape': '/pdfs/fauve-landscape.pdf',
+  'Finding Balance': '/pdfs/finding-balance.pdf',
+  'Heads & Faces': '/pdfs/heads-and-faces.pdf',
+  'Human Form': '/pdfs/human-form.pdf',
+  'Lights, Color, Collage': '/pdfs/lights-color-collage.pdf',
+  'Pleasing Pastels': '/pdfs/pleasing-pastels.pdf',
+  'Printmaking': '/pdfs/printmaking.pdf',
+  'See Shells': '/pdfs/see-shells.pdf',
+  'Watercolor Ecospheres': '/pdfs/watercolor-ecospheres.pdf',
+  'Watercolor Seascapes': '/pdfs/watercolor-seascapes.pdf',
+  'Watercolor Still Life': '/pdfs/watercolor-still-life.pdf',
 }
 
 // Helper: Get today's date, or use TEST_DATE if set
@@ -203,28 +216,58 @@ export default function App() {
         </h2>
         {upcomingClasses.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {upcomingClasses.map((cls, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: '#d946a6',
-                  borderRadius: '0.5rem',
-                  padding: '1rem',
-                  color: '#fff',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.25rem' }}>
-                  {cls['Date']} • {cls['Time']}
+            {upcomingClasses.map((cls, idx) => {
+              const isNext = idx === 0
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: isNext ? '#d946a6' : '#374151',
+                    borderRadius: '0.5rem',
+                    padding: '1rem',
+                    color: '#fff',
+                    border: isNext ? 'none' : '0.5px solid #4b5563',
+                    transform: isNext ? 'scale(1.02)' : 'scale(1)',
+                    boxShadow: isNext ? '0 4px 12px rgba(217, 70, 166, 0.3)' : 'none',
+                  }}
+                >
+                  {isNext && (
+                    <div style={{ fontSize: '0.75rem', fontWeight: '600', marginBottom: '0.5rem', color: '#fda4af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      🎯 Next Class
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.875rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.25rem' }}>
+                    {cls['Date']} • {cls['Time']}
+                  </div>
+                  <div style={{ fontSize: isNext ? '1.125rem' : '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                    {cls['Lesson']}
+                  </div>
+                  <div style={{ fontSize: '0.9rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.5rem' }}>
+                    {cls['Teacher']} @ {cls['School']}
+                    {cls['Grade'] && ` (Grade ${cls['Grade']})`}
+                  </div>
+                  {CURRICULUM_LINKS[cls['Lesson']] && (
+                    <a
+                      href={CURRICULUM_LINKS[cls['Lesson']]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-block',
+                        fontSize: '0.8rem',
+                        padding: '0.35rem 0.6rem',
+                        background: isNext ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                        borderRadius: '0.25rem',
+                        textDecoration: 'none',
+                        color: isNext ? '#fda4af' : '#93c5fd',
+                        border: isNext ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                      }}
+                    >
+                      {cls['Lesson'].includes('Cityscape') || cls['Lesson'].includes('Photography') || cls['Lesson'].includes('Art That Speaks') || cls['Lesson'].includes('Tidal Zone') ? '📖 Curriculum' : '📄 PDF'}
+                    </a>
+                  )}
                 </div>
-                <div style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                  {cls['Lesson']}
-                </div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>
-                  {cls['Teacher']} @ {cls['School']}
-                  {cls['Grade'] && ` (Grade ${cls['Grade']})`}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div style={{
@@ -253,6 +296,9 @@ export default function App() {
         </h2>
 
         <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.875rem', color: '#9ca3af', marginBottom: '0.5rem' }}>
+            Started: <span style={{ fontWeight: '600', color: '#f3f4f6' }}>October 2024</span>
+          </div>
           <div style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
             Years as docent: <span style={{ fontWeight: '600', color: '#f3f4f6', fontSize: '1rem' }}>
               {yearsAsDocent} {yearsAsDocent === 1 ? 'year' : 'years'}
