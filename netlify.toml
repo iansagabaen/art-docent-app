@@ -1,19 +1,8 @@
 [build]
   command = "npm run build"
-  functions = "netlify/functions"
   publish = "dist"
 
 [dev]
   framework = "vite"
   command = "npm run dev"
   port = 3000
-
-[[redirects]]
-  from = "/api/sheets-csv"
-  to = "/.netlify/functions/get-csv"
-  status = 200
-
-[[redirects]]
-  from = "/api/next-class"
-  to = "/.netlify/functions/next-class"
-  status = 200
