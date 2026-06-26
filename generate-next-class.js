@@ -90,8 +90,7 @@ async function generateNextClassJson() {
     })
 
     // Find upcoming classes (future dates)
-    // For testing: use Jan 1, 2026 to see upcoming classes
-    const today = new Date('2026-01-01')
+    const today = new Date()
     today.setHours(0, 0, 0, 0)
 
     const upcoming = ianRows.filter(row => {
