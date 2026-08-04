@@ -131,8 +131,9 @@ export default function App() {
 
   const fetchAndProcessData = async () => {
     try {
-      // Fetch CSV from backend proxy endpoint
-      const response = await fetch('/api/sheets-csv')
+      // Fetch CSV directly from Google Sheets
+      const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
+      const response = await fetch(csvUrl)
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const csvText = await response.text()
 
