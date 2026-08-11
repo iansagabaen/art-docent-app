@@ -244,10 +244,13 @@ export default function App() {
       // Filter upcoming classes (future dates, using test date if provided)
       const today2 = new Date(getTodayDate())
       today2.setHours(0, 0, 0, 0)
+
       const upcoming = ianRows.filter(row => {
         const dateStr = row['Date']
         if (!dateStr) return false
         const classDate = new Date(dateStr)
+        // Check for invalid date
+        if (isNaN(classDate.getTime())) return false
         classDate.setHours(0, 0, 0, 0)
         return classDate > today2
       })

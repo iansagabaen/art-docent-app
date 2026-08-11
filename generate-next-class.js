@@ -97,6 +97,8 @@ async function generateNextClassJson() {
       const dateStr = row['Date']
       if (!dateStr) return false
       const classDate = new Date(dateStr)
+      // Check for invalid date
+      if (isNaN(classDate.getTime())) return false
       classDate.setHours(0, 0, 0, 0)
       return classDate > today
     })
