@@ -42,14 +42,15 @@ function getTodayDate() {
   return new Date()
 }
 
-// Format date without leading zeros (e.g., "March 4, 2026" not "March 04, 2026")
+// Format date with day of week, no leading zeros (e.g., "Monday, March 4, 2026")
 function formatDateNoLeadingZero(dateStr) {
   if (!dateStr) return dateStr
   const date = new Date(dateStr)
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
   const month = date.toLocaleDateString('en-US', { month: 'long' })
   const day = date.getDate() // No leading zero
   const year = date.getFullYear()
-  return `${month} ${day}, ${year}`
+  return `${weekday}, ${month} ${day}, ${year}`
 }
 
 // Parse CSV line handling quoted fields with commas
