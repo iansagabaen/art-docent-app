@@ -131,16 +131,98 @@ export default function App() {
 
   const fetchAndProcessData = async () => {
     try {
-      // Fetch CSV directly from Google Sheets
+      // Try to fetch pre-calculated stats from Netlify function first
+      let stats = null
+      try {
+        const statsResponse = await fetch('/data/stats.json')
+        if (statsResponse.ok) {
+          stats = await statsResponse.json()
+          console.log('Using pre-calculated stats from /data/stats.json')
+        }
+      } catch (err) {
+        console.log('Stats file not available, falling back to live CSV parsing:', err.message)
+      }
+
+      // If we have pre-calculated stats, use them
+      if (stats && stats.lessons) {
+        setQualifiedLessons(stats.lessons.qualified || [])
+        setPotentiallyQualifiedLessons(stats.lessons.potential || [])
+        setSingleExperienceLessons(stats.lessons.single || [])
+      } else {
+        // Fallback: Fetch CSV directly from Google Sheets
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
+        const response = await fetch(csvUrl)
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        const csvText = await response.text()
+
+        // Parse CSV (comma-separated, handling quoted fields)
+        const lines = csvText.split('\n').filter(line => line.trim())
+        const headers = parseCSVLine(lines[0])
+
+        // Create array of objects from CSV
+        const rows = lines.slice(1).map(line => {
+          const values = parseCSVLine(line)
+          const obj = {}
+          headers.forEach((header, index) => {
+            obj[header] = values[index] || ''
+          })
+          return obj
+        })
+
+        // Filter rows where Ian appears in any role
+        const ianRows = rows.filter(row => {
+          const lead = row['Lead'] || ''
+          const assist = row['Assist'] || ''
+          const assist2 = row['Assist 2'] || ''
+          return lead.includes('Ian') || assist.includes('Ian') || assist2.includes('Ian')
+        })
+
+        // Count lessons
+        const lessonCounts = {}
+        ianRows.forEach(row => {
+          const lesson = row['Lesson']
+          if (lesson) {
+            lessonCounts[lesson] = (lessonCounts[lesson] || 0) + 1
+          }
+        })
+
+        // Categorize lessons
+        const qualified = []
+        const potentially = []
+        const single = []
+
+        Object.entries(lessonCounts).forEach(([lesson, count]) => {
+          if (count >= 3) {
+            qualified.push({ lesson, count })
+          } else if (count === 2) {
+            potentially.push({ lesson, count })
+          } else {
+            single.push({ lesson, count })
+          }
+        })
+
+        // Sort
+        setQualifiedLessons(qualified.sort((a, b) => b.count - a.count))
+        setPotentiallyQualifiedLessons(potentially.sort((a, b) => b.count - a.count))
+        setSingleExperienceLessons(single.sort((a, b) => a.lesson.localeCompare(b.lesson)))
+      }
+
+      // Calculate years as docent (using test date if provided)
+      const firstDate = new Date('2024-10-22')
+      const today = getTodayDate()
+      const yearsElapsed = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24 * 365.25))
+      setYearsAsDocent(yearsElapsed >= 2 ? yearsElapsed : 2)
+
+      // Fetch CSV for upcoming classes (always live)
       const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj04ZOaev6TJ1MTMeEphGMNps96WhCnB29JpzUGx1cr3wJjWCsGC2x5cVMDier6PXQNkZzIA_DlmmJ/pub?output=csv'
       const response = await fetch(csvUrl)
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
       const csvText = await response.text()
 
-      // Parse CSV (comma-separated, handling quoted fields)
+      // Parse CSV
       const lines = csvText.split('\n').filter(line => line.trim())
       const headers = parseCSVLine(lines[0])
-      
+
       // Create array of objects from CSV
       const rows = lines.slice(1).map(line => {
         const values = parseCSVLine(line)
@@ -158,41 +240,6 @@ export default function App() {
         const assist2 = row['Assist 2'] || ''
         return lead.includes('Ian') || assist.includes('Ian') || assist2.includes('Ian')
       })
-
-      // Count lessons
-      const lessonCounts = {}
-      ianRows.forEach(row => {
-        const lesson = row['Lesson']
-        if (lesson) {
-          lessonCounts[lesson] = (lessonCounts[lesson] || 0) + 1
-        }
-      })
-
-      // Categorize lessons
-      const qualified = []
-      const potentially = []
-      const single = []
-
-      Object.entries(lessonCounts).forEach(([lesson, count]) => {
-        if (count >= 3) {
-          qualified.push({ lesson, count })
-        } else if (count === 2) {
-          potentially.push({ lesson, count })
-        } else {
-          single.push({ lesson, count })
-        }
-      })
-
-      // Sort
-      setQualifiedLessons(qualified.sort((a, b) => b.count - a.count))
-      setPotentiallyQualifiedLessons(potentially.sort((a, b) => b.count - a.count))
-      setSingleExperienceLessons(single.sort((a, b) => a.lesson.localeCompare(b.lesson)))
-
-      // Calculate years as docent (using test date if provided)
-      const firstDate = new Date('2024-10-22')
-      const today = getTodayDate()
-      const yearsElapsed = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24 * 365.25))
-      setYearsAsDocent(yearsElapsed >= 2 ? yearsElapsed : 2)
 
       // Filter upcoming classes (future dates, using test date if provided)
       const today2 = new Date(getTodayDate())
