@@ -375,11 +375,11 @@ export default function App() {
                       overflow: 'auto',
                     }}
                   >
-                    <div style={{ fontSize: smallSize, opacity: 0.85, marginBottom: '1.25rem', lineHeight: 1.2 }}>
+                    <div style={{ fontSize: smallSize, opacity: 0.85, marginBottom: '0.15rem', lineHeight: 1.15 }}>
                       {dateLine}
                     </div>
                     {countdownLabel && (
-                      <div style={{ fontSize: heroSize, fontWeight: '700', lineHeight: 1.03, marginBottom: '1.5rem', color: '#fff' }}>
+                      <div style={{ fontSize: heroSize, fontWeight: '700', lineHeight: 1.0, marginBottom: '0.15rem', color: '#fff' }}>
                         {countdownLabel}
                       </div>
                     )}
@@ -391,13 +391,13 @@ export default function App() {
                         style={{
                           fontSize: lessonSize,
                           fontWeight: '700',
-                          marginBottom: '1.5rem',
+                          marginBottom: '0.15rem',
                           display: 'block',
                           textDecoration: 'none',
                           color: '#fff',
                           cursor: 'pointer',
                           opacity: 0.9,
-                          lineHeight: 1.1,
+                          lineHeight: 1.05,
                           transition: 'opacity 0.2s',
                         }}
                         onMouseEnter={(e) => e.target.style.opacity = '0.7'}
@@ -406,20 +406,20 @@ export default function App() {
                         {cls['Lesson']}
                       </a>
                     ) : (
-                      <div style={{ fontSize: lessonSize, fontWeight: '700', marginBottom: '1.5rem', lineHeight: 1.1 }}>
+                      <div style={{ fontSize: lessonSize, fontWeight: '700', marginBottom: '0.15rem', lineHeight: 1.05 }}>
                         {cls['Lesson']}
                       </div>
                     )}
-                    <div style={{ fontSize: teacherSize, opacity: 0.95, marginBottom: '0.35rem', lineHeight: 1.25 }}>
+                    <div style={{ fontSize: teacherSize, opacity: 0.95, marginBottom: '0.15rem', lineHeight: 1.15 }}>
                       {cls['Teacher']}
                     </div>
-                    <div style={{ fontSize: teacherSize, opacity: 0.8, marginBottom: '1.4rem', lineHeight: 1.25 }}>
+                    <div style={{ fontSize: teacherSize, opacity: 0.8, marginBottom: '0.15rem', lineHeight: 1.15 }}>
                       @ {cls['School']}
                       {cls['Grade'] && (
                         <span style={{ fontSize: smallSize, opacity: 0.85 }}> · Grade {cls['Grade']}</span>
                       )}
                     </div>
-                    <div style={{ fontSize: smallSize, opacity: 0.9, lineHeight: 1.45 }}>
+                    <div style={{ fontSize: smallSize, opacity: 0.9, lineHeight: 1.25 }}>
                       {!hasLead && (
                         <div style={{ color: '#fca5a5', marginBottom: '0.2rem' }}>
                           ⚠️ No lead assigned
