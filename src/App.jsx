@@ -313,6 +313,27 @@ export default function App() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {upcomingClasses.map((cls, idx) => {
               const isNext = idx === 0
+
+              // Days until this class: compare today (or testDate) and class date, both at local midnight
+              let daysUntil = null
+              if (isNext) {
+                const countdownToday = getTodayDate()
+                countdownToday.setHours(0, 0, 0, 0)
+                const countdownClassDate = new Date(cls['Date'])
+                if (!isNaN(countdownClassDate.getTime())) {
+                  countdownClassDate.setHours(0, 0, 0, 0)
+                  daysUntil = Math.round((countdownClassDate - countdownToday) / (1000 * 60 * 60 * 24))
+                }
+              }
+              const countdownLabel =
+                daysUntil === null || daysUntil < 0
+                  ? null
+                  : daysUntil === 0
+                  ? 'Today'
+                  : daysUntil === 1
+                  ? 'Tomorrow'
+                  : `in ${daysUntil} days`
+
               return (
                 <div
                   key={idx}
@@ -324,11 +345,25 @@ export default function App() {
                     border: isNext ? 'none' : '0.5px solid #4b5563',
                     transform: isNext ? 'scale(1.02)' : 'scale(1)',
                     boxShadow: isNext ? '0 4px 12px rgba(217, 70, 166, 0.3)' : 'none',
+                    ...(isNext
+                      ? {
+                          aspectRatio: '1 / 1',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          overflow: 'auto',
+                        }
+                      : {}),
                   }}
                 >
                   <div style={{ fontSize: '0.875rem', opacity: isNext ? 0.9 : 0.7, marginBottom: '0.25rem' }}>
                     {formatDateNoLeadingZero(cls['Date'])} • {cls['Time']}
                   </div>
+                  {isNext && countdownLabel && (
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', lineHeight: 1.1, marginBottom: '0.5rem', color: '#fff' }}>
+                      {countdownLabel}
+                    </div>
+                  )}
                   {getPdfUrlForLesson(cls['Lesson']) ? (
                     <a
                       href={getPdfUrlForLesson(cls['Lesson'])}
