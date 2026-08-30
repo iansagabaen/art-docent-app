@@ -240,3 +240,32 @@ Container unchanged from the first pass except padding went `1rem` ->
   dominant, all lines legible, no overflow.
 - Post-deploy LIVE screenshots captured at desktop and mobile widths from
   `https://eloquent-horse-a1ede7.netlify.app/` - match the local dev render.
+
+---
+
+## 2026-08-30 — Tighten inter-line spacing on the `isNext` square
+
+The stacked lines carried large `marginBottom` gaps that left the text block
+looser than wanted. Reduced every inter-line gap to a uniform `0.15rem` and
+tightened `lineHeight` so wrapped lines don't reintroduce the gap. `isNext`
+square only; all other cards render through unchanged code. `justifyContent:
+'center'` kept, so the now-shorter block stays vertically centered.
+
+| Line | `marginBottom` before → after | `lineHeight` before → after |
+|---|---|---|
+| date line | `1.25rem` → `0.15rem` | `1.2` → `1.15` |
+| countdown hero ("in N days") | `1.5rem` → `0.15rem` | `1.03` → `1.0` |
+| lesson (`<a>` PDF link) | `1.5rem` → `0.15rem` | `1.1` → `1.05` |
+| lesson (`<div>` no-PDF fallback) | `1.5rem` → `0.15rem` | `1.1` → `1.05` |
+| teacher | `0.35rem` → `0.15rem` | `1.25` → `1.15` |
+| "@ School · Grade" | `1.4rem` → `0.15rem` | `1.25` → `1.15` |
+| leads/assists wrapper | (none) | `1.45` → `1.25` |
+
+Unchanged: `clamp()` font sizes, `fontWeight`s, colors/opacities, PDF-link
+behavior, the "Ian" highlight, the "⚠️ No lead assigned" warning (incl. its
+`0.2rem` marginBottom), the square (`aspectRatio: '1 / 1'`), pink bg / radius /
+shadow / `scale(1.02)` / `overflow: 'auto'`, card padding.
+
+Verified: dev render at desktop + mobile (375×812) — lines now sit close
+together, block still vertically centered, "in N days" still the clear hero,
+nothing clipped. `?testDate=2026-09-11` ("Tomorrow") layout holds. Build clean.
