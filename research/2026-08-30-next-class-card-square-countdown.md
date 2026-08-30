@@ -150,3 +150,93 @@ verified above in isolation. Plain `?testDate=2026-09-02` renders "Tomorrow"
 - No console errors from the change. Pre-existing dev-only console noise
   (stats.json 404 -> CSV fallback, PDF listing unavailable, service-worker
   registration failing) is unrelated.
+
+---
+
+# 2026-08-30 (later pass): restyle the square so bigger text fills it
+
+**File touched:** `src/App.jsx` (still only the `isNext` / first card)
+**Build bundle:** `dist/assets/index-CwqeLou5.js` (was `index-DjLPVrRV.js`)
+**Deploy:** commit `2bc186f` pushed to `main` -> Netlify -> live, hash verified
+via `curl … | grep assets/index`.
+
+## Why
+
+The first pass made the card a square but the content stayed at its old small
+sizes, vertically centered, leaving a big empty band above and below on both
+desktop and mobile. This pass rebuilds the `isNext` card as a dedicated stacked
+layout with a real size hierarchy that fills most of the square.
+
+## How it's structured now
+
+The `.map()` callback gets an early `if (isNext) { return (<square/>) }` branch
+**before** the original `return (` - so every other card renders through the
+exact same untouched code as before (verified: the diff is purely additive,
+the old block is byte-for-byte unchanged).
+
+Inside the branch, four `clamp()` size tokens drive the hierarchy (no media
+queries - they scale with viewport width between the min and max):
+
+| Token | Value | Used by |
+|---|---|---|
+| `heroSize`    | `clamp(2.75rem, 13vw, 8.5rem)`  | countdown ("in N days") - the hero |
+| `lessonSize`  | `clamp(1.6rem, 7.5vw, 4.75rem)` | lesson name (bold; `<a>` when a PDF URL exists, else `<div>`) |
+| `teacherSize` | `clamp(1.15rem, 5vw, 3.15rem)`  | teacher line and "@ School" line |
+| `smallSize`   | `clamp(0.9rem, 3.6vw, 2rem)`    | abbreviated date line, Grade suffix, each lead/assist name |
+
+Line order in the square (top to bottom, all inside the vertically-centered
+flex column):
+
+1. **Date line** - `smallSize`, `opacity 0.85`, `marginBottom 1.25rem`.
+   Abbreviated form built with `toLocaleDateString`:
+   `` `${d.toLocaleDateString('en-US',{weekday:'short'})} • ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})} • ${cls['Time']}` `` ->
+   e.g. **"Wed • Sep 2 • 12:45 PM"**. Falls back to
+   `formatDateNoLeadingZero(cls['Date'])` if the date can't be parsed. Other
+   cards still use `formatDateNoLeadingZero` unchanged.
+2. **Countdown** - `heroSize`, `fontWeight 700`, `lineHeight 1.03`,
+   `marginBottom 1.5rem`. Same `countdownLabel` logic as the first pass (day
+   math untouched).
+3. **Lesson** - `lessonSize`, `fontWeight 700`, `marginBottom 1.5rem`. PDF-link
+   behavior preserved exactly: same `href` (`getPdfUrlForLesson(cls['Lesson'])`),
+   `target="_blank"`, `rel="noopener noreferrer"`, and the mouseenter/leave
+   opacity 0.9<->0.7 hover; plain `<div>` when there's no PDF URL.
+4. **Teacher** - `teacherSize`, `opacity 0.95`, on its own line.
+5. **"@ School"** - `teacherSize`, `opacity 0.8`, own line. If `cls['Grade']`
+   is set, ` · Grade N` is appended in `smallSize`/`opacity 0.85` (subtle).
+6. **Leads/assists** - `smallSize` container; `⚠️ No lead assigned` in
+   `#fca5a5` when there's no lead; then each person on **its own `<div>`**
+   (comma joining dropped for this card only). "Ian" highlight kept:
+   `color '#fda4af'` + `fontWeight 600` when `person.isIan && ianIsLead`, else
+   `#d1d5db`.
+
+Container unchanged from the first pass except padding went `1rem` ->
+`1.25rem 1.5rem`: still `background '#d946a6'`, `borderRadius 0.5rem`,
+`boxShadow 0 4px 12px rgba(217,70,166,0.3)`, `transform scale(1.02)`,
+`aspectRatio '1 / 1'`, flex column + `justifyContent center`, `overflow 'auto'`.
+
+## Verification
+
+- `npm run build` clean: `dist/assets/index-CwqeLou5.js` (156.22 kB), CSS hash
+  unchanged.
+- Live console after deploy: only the two benign pre-existing `[log]` lines
+  (PDF listing / stats file fallback). No errors or warnings.
+- `?testDate=2026-09-11` -> hero "Tomorrow"; `?testDate=2026-09-12` /
+  `2026-09-15` -> "in 3 days" / "in 11 days". Layout holds in every case; the
+  two-digit "in 11 days" still fits the mobile square.
+
+## Screenshots (described)
+
+- **Before this pass:** square card, small content clustered in a ~230px band
+  in the vertical middle of a ~720px (desktop) / ~345px (mobile) square, with
+  large empty pink margins top and bottom.
+- **After, desktop (1280px viewport, ~720px square):** content fills ~80%+ of
+  the square with modest padding. Top to bottom: muted "Wed • Sep 2 • 12:45 PM",
+  then a very large bold **"in 3 days"** (the clear hero), then large bold
+  **"Photography"**, then medium "Sydney Straight" and slightly-muted
+  "@ Gardner Bullis · Grade 5", then small "Wendy Marti" / "Ian Sagabaen" each
+  on their own line. Nothing clipped, no scrollbar. Cards 2..n unchanged (gray,
+  auto height, comma-joined names, full weekday-date format).
+- **After, mobile (375x812):** same hierarchy in a ~345px square, "in 3 days"
+  dominant, all lines legible, no overflow.
+- Post-deploy LIVE screenshots captured at desktop and mobile widths from
+  `https://eloquent-horse-a1ede7.netlify.app/` - match the local dev render.
