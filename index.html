@@ -13,6 +13,14 @@
     <div id="root"></div>
     <script>
       if ('serviceWorker' in navigator) {
+        // When an updated service worker takes control, reload once so the
+        // page runs against the newest deploy (fixes iOS stale-cache).
+        let reloadedForUpdate = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (reloadedForUpdate) return;
+          reloadedForUpdate = true;
+          window.location.reload();
+        });
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(err => {
             console.log('ServiceWorker registration failed: ', err);

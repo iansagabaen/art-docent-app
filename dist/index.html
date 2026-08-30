@@ -7,13 +7,21 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#111827" />
     <meta name="description" content="Track your art docent schedule and teaching experience" />
-    <script type="module" crossorigin src="/assets/index-Cg0xDVlO.js"></script>
+    <script type="module" crossorigin src="/assets/index-Vp9jSvrA.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DKy-mQ0r.css">
   </head>
   <body>
     <div id="root"></div>
     <script>
       if ('serviceWorker' in navigator) {
+        // When an updated service worker takes control, reload once so the
+        // page runs against the newest deploy (fixes iOS stale-cache).
+        let reloadedForUpdate = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (reloadedForUpdate) return;
+          reloadedForUpdate = true;
+          window.location.reload();
+        });
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(err => {
             console.log('ServiceWorker registration failed: ', err);
