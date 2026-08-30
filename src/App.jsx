@@ -334,6 +334,113 @@ export default function App() {
                   ? 'Tomorrow'
                   : `in ${daysUntil} days`
 
+              // The "next" card is a dedicated square with a stacked size hierarchy.
+              if (isNext) {
+                const nextDate = new Date(cls['Date'])
+                const validNextDate = !isNaN(nextDate.getTime())
+                const dateLine = validNextDate
+                  ? `${nextDate.toLocaleDateString('en-US', { weekday: 'short' })} • ${nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • ${cls['Time']}`
+                  : `${formatDateNoLeadingZero(cls['Date'])} • ${cls['Time']}`
+
+                const lead = cls['Lead']?.trim() || ''
+                const assist1 = cls['Assist']?.trim() || ''
+                const assist2 = cls['Assist 2']?.trim() || ''
+                const ianIsLead = lead.includes('Ian')
+                const hasLead = lead.length > 0
+                const people = []
+                if (lead) people.push({ name: lead, isIan: lead.includes('Ian') })
+                if (assist1) people.push({ name: assist1, isIan: assist1.includes('Ian') })
+                if (assist2) people.push({ name: assist2, isIan: assist2.includes('Ian') })
+
+                const heroSize = 'clamp(2.75rem, 13vw, 8.5rem)'
+                const lessonSize = 'clamp(1.6rem, 7.5vw, 4.75rem)'
+                const teacherSize = 'clamp(1.15rem, 5vw, 3.15rem)'
+                const smallSize = 'clamp(0.9rem, 3.6vw, 2rem)'
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      background: '#d946a6',
+                      borderRadius: '0.5rem',
+                      padding: '1.25rem 1.5rem',
+                      color: '#fff',
+                      border: 'none',
+                      transform: 'scale(1.02)',
+                      boxShadow: '0 4px 12px rgba(217, 70, 166, 0.3)',
+                      aspectRatio: '1 / 1',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      overflow: 'auto',
+                    }}
+                  >
+                    <div style={{ fontSize: smallSize, opacity: 0.85, marginBottom: '1.25rem', lineHeight: 1.2 }}>
+                      {dateLine}
+                    </div>
+                    {countdownLabel && (
+                      <div style={{ fontSize: heroSize, fontWeight: '700', lineHeight: 1.03, marginBottom: '1.5rem', color: '#fff' }}>
+                        {countdownLabel}
+                      </div>
+                    )}
+                    {getPdfUrlForLesson(cls['Lesson']) ? (
+                      <a
+                        href={getPdfUrlForLesson(cls['Lesson'])}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: lessonSize,
+                          fontWeight: '700',
+                          marginBottom: '1.5rem',
+                          display: 'block',
+                          textDecoration: 'none',
+                          color: '#fff',
+                          cursor: 'pointer',
+                          opacity: 0.9,
+                          lineHeight: 1.1,
+                          transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={(e) => e.target.style.opacity = '0.7'}
+                        onMouseLeave={(e) => e.target.style.opacity = '0.9'}
+                      >
+                        {cls['Lesson']}
+                      </a>
+                    ) : (
+                      <div style={{ fontSize: lessonSize, fontWeight: '700', marginBottom: '1.5rem', lineHeight: 1.1 }}>
+                        {cls['Lesson']}
+                      </div>
+                    )}
+                    <div style={{ fontSize: teacherSize, opacity: 0.95, marginBottom: '0.35rem', lineHeight: 1.25 }}>
+                      {cls['Teacher']}
+                    </div>
+                    <div style={{ fontSize: teacherSize, opacity: 0.8, marginBottom: '1.4rem', lineHeight: 1.25 }}>
+                      @ {cls['School']}
+                      {cls['Grade'] && (
+                        <span style={{ fontSize: smallSize, opacity: 0.85 }}> · Grade {cls['Grade']}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: smallSize, opacity: 0.9, lineHeight: 1.45 }}>
+                      {!hasLead && (
+                        <div style={{ color: '#fca5a5', marginBottom: '0.2rem' }}>
+                          ⚠️ No lead assigned
+                        </div>
+                      )}
+                      {people.map((person, pIdx) => (
+                        <div
+                          key={pIdx}
+                          style={{
+                            color: person.isIan && ianIsLead ? '#fda4af' : '#d1d5db',
+                            fontWeight: person.isIan && ianIsLead ? '600' : 'normal'
+                          }}
+                        >
+                          {person.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
               return (
                 <div
                   key={idx}
