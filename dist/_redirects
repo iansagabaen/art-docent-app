@@ -1,0 +1,8 @@
+# Allow static files and assets through
+/assets/*  /assets/:splat  200!
+/pdfs/*    /pdfs/:splat    200!
+/*.json    /:splat.json    200!
+/*.svg     /:splat.svg     200!
+
+# SPA routing for everything else
+/*  /index.html  200

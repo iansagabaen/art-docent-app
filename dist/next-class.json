@@ -1,5 +1,41 @@
 {
-  "nextClass": null,
-  "generatedAt": "2026-06-25T18:29:05.045Z",
-  "upcoming": []
+  "nextClass": {
+    "date": "Sep 2",
+    "time": "12:45 PM",
+    "lesson": "Photography",
+    "teacher": "Sydney Straight",
+    "school": "Gardner Bullis",
+    "grade": "5",
+    "lead": "Wendy Marti",
+    "assist": "Ian Sagabaen",
+    "assist2": ""
+  },
+  "generatedAt": "2026-08-30T06:06:57.060Z",
+  "upcoming": [
+    {
+      "date": "Sep 2",
+      "lesson": "Photography",
+      "teacher": "Sydney Straight"
+    },
+    {
+      "date": "Sep 11",
+      "lesson": "Cityscape",
+      "teacher": "Melissa Cortes Ibarra"
+    },
+    {
+      "date": "Sep 14",
+      "lesson": "Art That Speaks",
+      "teacher": "Arlene Bautista"
+    },
+    {
+      "date": "Sep 25",
+      "lesson": "Cityscape",
+      "teacher": "Amanda Pellicani"
+    },
+    {
+      "date": "Sep 30",
+      "lesson": "Radial Printmaking",
+      "teacher": "Cortney Mase"
+    }
+  ]
 }
