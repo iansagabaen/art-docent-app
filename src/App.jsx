@@ -36,7 +36,11 @@ const CURRICULUM_LINKS = {
 function getTodayDate() {
   const testDate = new URLSearchParams(window.location.search).get('testDate')
   if (testDate) {
-    const d = new Date(testDate)
+    // Date-only values (YYYY-MM-DD) parse as UTC midnight, which lands on the
+    // previous evening in America/Los_Angeles. Force local midnight so test
+    // dates line up with how real class-date strings ("September 2, 2026") parse.
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(testDate)
+    const d = new Date(isDateOnly ? testDate + 'T00:00:00' : testDate)
     if (!isNaN(d)) return d
   }
   return new Date()
@@ -253,10 +257,28 @@ export default function App() {
         // Check for invalid date
         if (isNaN(classDate.getTime())) return false
         classDate.setHours(0, 0, 0, 0)
-        return classDate > today2
+        // >= so a class dated today is included (countdown then reads "Today").
+        // Both sides are floored to local midnight, so yesterday-or-earlier is still excluded.
+        return classDate >= today2
       })
 
-      setUpcomingClasses(upcoming.sort((a, b) => new Date(a['Date']) - new Date(b['Date'])))
+      // Sort by date, then by start time so the earliest of two same-day classes leads.
+      const parseTimeToMinutes = (timeStr) => {
+        if (!timeStr) return 0
+        const m = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i)
+        if (!m) return 0
+        let hours = parseInt(m[1], 10)
+        const mins = parseInt(m[2], 10)
+        const period = m[3] ? m[3].toUpperCase() : null
+        if (period === 'PM' && hours !== 12) hours += 12
+        if (period === 'AM' && hours === 12) hours = 0
+        return hours * 60 + mins
+      }
+      setUpcomingClasses(upcoming.sort((a, b) => {
+        const dateDiff = new Date(a['Date']) - new Date(b['Date'])
+        if (dateDiff !== 0) return dateDiff
+        return parseTimeToMinutes(a['Time']) - parseTimeToMinutes(b['Time'])
+      }))
       setLoading(false)
     } catch (err) {
       console.error('Error fetching data:', err)
