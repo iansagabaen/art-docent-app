@@ -269,3 +269,88 @@ shadow / `scale(1.02)` / `overflow: 'auto'`, card padding.
 Verified: dev render at desktop + mobile (375×812) — lines now sit close
 together, block still vertically centered, "in N days" still the clear hero,
 nothing clipped. `?testDate=2026-09-11` ("Tomorrow") layout holds. Build clean.
+
+---
+
+## 2026-09-02 — Fix: today's class now shows as the square card with countdown "Today"
+
+### The bug
+
+When Ian had a lesson **today**, the highlighted square card showed his *next*
+future class (e.g. "in 9 days") instead of today's class. The `daysUntil === 0
+-> "Today"` branch in the `isNext` block was effectively dead code.
+
+Root cause: the "upcoming classes" filter in `src/App.jsx` excluded today.
+
+```js
+classDate.setHours(0, 0, 0, 0)
+return classDate > today2     // strict >, so a class dated today is dropped
+```
+
+Secondary issue: `getTodayDate()` parsed a `?testDate=YYYY-MM-DD` value with
+`new Date("2026-09-02")`, which is **UTC** midnight. In America/Los_Angeles that
+lands on the previous evening, so date-only test values were off by one and
+"Today" could not be tested cleanly. (Real class-date strings like
+`"September 2, 2026"` already parse as local midnight, so they were fine.)
+
+### The fix (two lines of behaviour, both in `src/App.jsx`)
+
+1. Filter: `classDate > today2` -> `classDate >= today2`. Both sides are floored
+   to local midnight, so a class dated **yesterday or earlier is still excluded**
+   (verified via `?testDate=2026-09-03`); a class dated **today is now
+   included** and the countdown reads "Today".
+2. `getTodayDate()`: when `testDate` matches `^\d{4}-\d{2}-\d{2}$` (date only),
+   parse as `new Date(testDate + 'T00:00:00')` (local midnight). Values that
+   include a time, and the no-param real-`new Date()` path, are unchanged.
+
+Nice-to-have also included: secondary sort by start time
+(`parseTimeToMinutes("12:45 PM")`) so that when two classes share a date, the
+earliest leads. Pure tiebreaker — only consulted when the date comparison is 0.
+
+Not touched: the `isNext` square card styles / layout / countdown-label logic
+from the earlier passes, and every other card and code path.
+
+### testDate verification matrix (local dev + live)
+
+| `?testDate=` | Square card | Countdown | Notes |
+|---|---|---|---|
+| `2026-09-01` | Sep 2 Photography | **Tomorrow** | today+1 |
+| `2026-09-02` | Sep 2 Photography | **Today** | was Sep 2 / "Tomorrow" (LA) before fix; would show Sep 11 in a UTC tz |
+| `2026-09-03` | Sep 11 Cityscape | in 8 days | Sep 2 now past, correctly excluded |
+| _(no param)_ | Sep 2 Photography | **Today** | sandbox/browser clock is 2026-09-02, so a real class is today; pre-fix this showed Sep 11 |
+
+Before/after proof: at `?testDate=2026-09-02` the square card is now the **Sep 2
+"Photography"** class with the hero countdown reading **"Today"**. Before the
+fix the same URL rendered "Tomorrow" (LA timezone; strict `>` + UTC testDate
+parse), and in a UTC-or-east timezone it dropped Sep 2 entirely and showed
+"Sep 11 Cityscape / in 9 days".
+
+### Screenshots
+
+- Local dev (port 5199, fresh — port 5173 served a stale HMR bundle) and
+  post-deploy **live** (`https://eloquent-horse-a1ede7.netlify.app/`),
+  desktop (800w) + mobile (375×812), at `?testDate=2026-09-02`: pink square
+  card, date line "Wed • Sep 2 • 12:45 PM", hero "Today", "Photography",
+  "Sydney Straight", "@ Gardner Bullis · Grade 5", "Wendy Marti / Ian Sagabaen".
+  Layout unchanged from the prior spacing pass; nothing clipped.
+- No-param live: same card, "Today" (real date is 2026-09-02).
+
+### Build / deploy
+
+- `npm run build` -> `dist/assets/index-Z2BoPyap.js` (was `index-_9iqhcdf.js`),
+  `dist/assets/index-DKy-mQ0r.css` unchanged.
+- Commit `6784ac8` on `main`, pushed; Netlify auto-deploy. Live
+  `curl ... | grep assets/index` confirmed `assets/index-Z2BoPyap.js` within
+  ~40s. Live `read_console_messages` clean (only the pre-existing
+  "PDF listing not available" / "Stats file not available, falling back to live
+  CSV parsing" info logs).
+
+### Follow-up (deferred, out of scope)
+
+`generate-next-class.js` (line ~103) has the **identical** bug —
+`return classDate > today` — for the iOS-widget feed `public/next-class.json`.
+After this build ran on 2026-09-02 it regenerated the JSON with today's Sep 2
+class dropped ("Next class: Cityscape on Sep 11"), so the widget and the web app
+now disagree on days when Ian teaches. Same one-character `>=` fix would align
+them; left untouched here because the task scoped changes to `src/App.jsx` only
+and the widget path has no test coverage in this pass.
